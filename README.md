@@ -1,4 +1,9 @@
 ![Demo Image](./demo.jpg)
+<p align="center">
+  <img src="./demo.jpg" width="400px">
+</p>
+
+---
 # 🚀 Next-Gen AI & AR Business Card
 
 ブラウザだけで動作する、AIコンシェルジュを搭載した次世代型AR名刺システムです。
