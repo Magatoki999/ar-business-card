@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>AR Business Card - Ultimate AI Edition</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        #ui-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        
+        /* メッセージエリア：高さを自動調整 */
+        #ar-ui { 
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); 
+            width: 90%; text-align: center; color: white; 
+            background: rgba(0,0,0,0.8); padding: 15px 10px; border-radius: 20px; 
+            border: 1px solid #00E5FF; font-size: 13px; line-height: 1.6;
+            box-sizing: border-box;
+            backdrop-filter: blur(8px);
+            z-index: 1100;
+        }
+
+        /* ボタン群：ボタンが増えたため、重なりを防ぐよう bottom をさらに調整 */
+        .side-buttons {
+            position: absolute; right: 15px; bottom: 145px; 
+            display: none; flex-direction: column-reverse;
+            gap: 10px; pointer-events: auto;
+            z-index: 1200;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .circle-btn {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #00E5FF; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            opacity: 0;
+        }
+        .show-btn { animation: slideIn 0.5s ease-out both; }
+        .circle-btn img { width: 22px; height: 22px; }
+        
+        #audio-toggle-btn { background: #00E5FF; }
+        #mail-btn { background: #FFEB3B; border-color: #FBC02D; }
+        #sns-ar-btn { background: #007bff; border-color: #00d2ff; }
+        /* noteボタンのブランドカラー設定 */
+        #note-btn { background: #2cb696; border-color: #259d81; }
+    </style>
+</head>
+<body>
+    <div id="ui-layer">
+        <div id="ar-ui">カードをスキャンしてください...</div>
+        <div class="side-buttons" id="btn-group">
+            <button id="audio-toggle-btn" class="circle-btn">
+                <img id="audio-icon-ui" src="https://cdn-icons-png.flaticon.com/512/3127/3127501.png">
+            </button>
+            
+            <button id="sns-ar-btn" class="circle-btn" onclick="location.href='./sns.html'">
+                <img src="https://cdn-icons-png.flaticon.com/512/33/33308.png" style="filter: invert(1);">
+            </button>
+
+            <button id="note-btn" class="circle-btn" onclick="location.href='https://note.com/magatoki'">
+                <img src="https://cdn-icons-png.flaticon.com/512/37/37631.png" style="filter: invert(1); width: 20px;">
+            </button>
+
+            <button class="circle-btn" onclick="location.href='https://www.instagram.com/rukiruki475'">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png">
+            </button>
+            <button class="circle-btn" onclick="location.href='https://www.facebook.com/shigenari.murai'">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png">
+            </button>
+            <button class="circle-btn" onclick="location.href='https://www.youtube.com/@magatoki_ohma'">
+                <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+            </button>
+            <button id="mail-btn" class="circle-btn" onclick="location.href='mailto:info@magatokilab.com'">
+                <img src="https://cdn-icons-png.flaticon.com/512/542/542689.png">
+            </button>
+            <button class="circle-btn" onclick="location.href='https://x.com/RukiRuki475'">
+                <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png">
+            </button>
+        </div>
+    </div>
+
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;" 
+             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false">
+        
+        <a-assets>
+            <a-asset-item id="avatarModel" src="./model.glb"></a-asset-item>
+            <video id="ar-video" src="./intro.mp4" preload="auto" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted></video>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+            <a-ring color="#00E5FF" radius-inner="0.55" radius-outer="0.6" 
+                    position="0 0 0.01" rotation="0 0 0"
+                    material="transparent: true; opacity: 0.5; shader: flat"
+                    animation="property: scale; from: 0.75 0.75 0.75; to: 1.05 1.05 1.05; dir: alternate; dur: 1500; loop: true">
+            </a-ring>
+            
+            <a-circle color="#00E5FF" radius="0.62" position="0 0 0.005" rotation="0 0 0"
+                      material="transparent: true; shader: flat"
+                      animation__scale="property: scale; from: 0.75 0.75 0.75; to: 1.05 1.05 1.05; dir: alternate; dur: 1500; loop: true"
+                      animation__opacity="property: material.opacity; from: 0.2; to: 0.05; dir: alternate; dur: 1500; loop: true">
+            </a-circle>
+
+            <a-gltf-model src="#avatarModel" position="0 0 0.1" rotation="-90 180 0" scale="0.4 0.4 0.4" animation-mixer></a-gltf-model>
+
+            <a-video id="video-screen" src="#ar-video" position="0 0.8 0.3" rotation="-90 0 180" scale="-1 1 1"
+                      width="1.2" height="0.675" material="shader: flat; side: double;"></a-video>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        const uiText = document.querySelector('#ar-ui');
+        const target = document.querySelector('#card-target');
+        const video = document.querySelector('#ar-video');
+        const btnGroup = document.querySelector('#btn-group');
+        const audioBtn = document.querySelector('#audio-toggle-btn');
+        const audioIcon = document.querySelector('#audio-icon-ui');
+
+        function updateGreeting() {
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const hour = now.getHours();
+            
+            const monthGreetings = {
+                1: "謹賀新年。本年もどうぞよろしくお願いいたします！",
+                2: "暦の上では春ですが、まだ寒い日が続きますね。",
+                3: "春の訪れ。新しい出会いの季節ですね！",
+                4: "新年度スタート！心機一転頑張りましょう。",
+                5: "爽やかな新緑の季節。いかがお過ごしですか？",
+                6: "雨の季節も、心は晴れやかに。",
+                7: "夏本番！熱中症にはお気をつけください。",
+                8: "残暑お見舞い申し上げます。",
+                9: "少しずつ秋の気配がしてきましたね。",
+                10: "実りの秋、何事にも挑戦したい季節です。",
+                11: "朝晩冷え込むようになりました。ご自愛ください。",
+                12: "今年もあとわずか。良き締めくくりになりますように。"
+            };
+
+            let timeMsg = "";
+            if (hour >= 5 && hour < 10) {
+                timeMsg = "☀️ おはようございます！";
+            } else if (hour >= 10 && hour < 17) {
+                timeMsg = "☕ こんにちは。お仕事お疲れ様です。";
+            } else if (hour >= 17 && hour < 21) {
+                timeMsg = "🌆 こんばんは。今日もお疲れ様でした。";
+            } else {
+                timeMsg = "🌙 夜更かしですか？ゆっくり休んでくださいね。";
+            }
+
+            const seasonMsg = monthGreetings[month] || "本日はお忙しい中、ありがとうございます！";
+            
+            // noteへの誘導メッセージを最後に追加
+            uiText.innerHTML = `<strong>${timeMsg}</strong><br>${seasonMsg}<br><span style="color:#00E5FF; font-weight:bold; font-size:12px;">noteやAR掲示板もぜひご覧ください！</span>`;
+        }
+
+        updateGreeting();
+
+        target.addEventListener("targetFound", () => {
+            video.play();
+            btnGroup.style.display = "flex";
+            const buttons = btnGroup.querySelectorAll('.circle-btn');
+            buttons.forEach((btn, index) => {
+                btn.classList.remove('show-btn');
+                setTimeout(() => { btn.classList.add('show-btn'); }, index * 80);
+            });
+        });
+
+        target.addEventListener("targetLost", () => {
+            video.pause();
+            btnGroup.style.display = "none";
+        });
+
+        audioBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            audioIcon.src = video.muted ? 
+                "https://cdn-icons-png.flaticon.com/512/3127/3127501.png" : 
+                "https://cdn-icons-png.flaticon.com/512/727/727269.png";
+        });
+    </script>
+</body>
+</html>
