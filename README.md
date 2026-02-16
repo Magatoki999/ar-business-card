@@ -1,4 +1,3 @@
-![Demo Image](./demo.jpg)
 <p align="center">
   <img src="./demo.jpg" width="400px">
 </p>
