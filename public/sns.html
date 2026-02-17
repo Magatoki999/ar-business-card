@@ -182,6 +182,7 @@
         let lastActionTime = 0;
         let pendingDeleteId = null;
 
+        // --- いいね・削除アクションの統合処理 ---
         const handleAction = async (clientX, clientY) => {
             const now = Date.now();
             if (now - lastActionTime < 400) return;
@@ -190,16 +191,29 @@
             const raycaster = new THREE.Raycaster(); raycaster.setFromCamera(mouse, camera);
             const clickables = Array.from(document.querySelectorAll('.clickable')).map(el => el.object3D);
             const intersects = raycaster.intersectObjects(clickables, true);
+            
             if (intersects.length > 0) {
                 lastActionTime = now;
                 let targetEl = intersects[0].object.el;
                 const docId = targetEl.dataset.docid;
                 const ownerId = targetEl.dataset.ownerid;
+
+                // 自分の投稿なら削除確認
                 if (ownerId === userId) {
                     pendingDeleteId = docId;
                     document.getElementById('delete-confirm').style.display = 'block';
                 } else {
+                    // 他人の投稿ならいいね処理（1回限定チェック）
+                    const likedComments = JSON.parse(localStorage.getItem('liked_comments') || "[]");
+                    if (likedComments.includes(docId)) {
+                        console.log("Already liked this comment.");
+                        return; // すでにいいね済みなら何もしない
+                    }
+
                     createHeartBurst(clientX, clientY);
+                    likedComments.push(docId);
+                    localStorage.setItem('liked_comments', JSON.stringify(likedComments)); // 履歴に保存
+                    
                     await updateDoc(doc(db, "comments", docId), { likes: increment(1) });
                 }
             }
@@ -215,9 +229,19 @@
             }
         }
 
+        // --- PC/スマホ両対応のイベントリスナー ---
+        // スマホ用
         window.addEventListener('touchstart', (e) => { if (e.target.closest('#ui-layer')) return; touchStartPos = e.touches[0].clientY; isDragging = false; });
         window.addEventListener('touchmove', (e) => { if (e.target.closest('#ui-layer')) return; const deltaY = touchStartPos - e.touches[0].clientY; if (Math.abs(deltaY) > 5) { isDragging = true; currentScroll += deltaY * 0.005; updateCommentPositions(); touchStartPos = e.touches[0].clientY; } });
         window.addEventListener('touchend', (e) => { if (!isDragging && !e.target.closest('#ui-layer')) handleAction(e.changedTouches[0].clientX, e.changedTouches[0].clientY); });
+
+        // PC用 (マウス)
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.closest('#ui-layer')) return;
+            // 右クリックなどは除外
+            if (e.button !== 0) return;
+            handleAction(e.clientX, e.clientY);
+        });
 
         [0, 1, 2, 3].forEach(index => {
             const target = document.getElementById(`target${index}`);
