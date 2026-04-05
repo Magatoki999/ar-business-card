@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ONI Quiz AR - Card Battle</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; overflow: hidden; font-family: 'Hiragino Kaku Gothic ProN', sans-serif; background: #000; }
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #4a0000 0%, #000000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 30000; transition: opacity 0.8s ease; }
+        #start-btn { padding: 20px 60px; font-size: 1.1rem; font-weight: bold; color: white; background: transparent; border: 2px solid #ff4757; border-radius: 5px; cursor: pointer; }
+        #ui-layer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000; pointer-events: none; }
+
+        /* --- sns.htmlと完全に統一した戻るボタン（face.jpg使用） --- */
+        #back-to-card { 
+            position: fixed; top: 20px; right: 20px; 
+            width: 66px; height: 66px; 
+            background: white; border: 4px solid #007bff; border-radius: 50%; 
+            z-index: 25000; overflow: hidden; cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); pointer-events: auto;
+        }
+        #back-to-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 問題枠がボタンと被らないよう top を 100px に調整 */
+        #question-container { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; pointer-events: auto; }
+        #question-box { background: rgba(0, 0, 0, 0.85); color: white; padding: 20px; border-radius: 15px; border: 2px solid #ff4757; text-align: center; font-size: 18px; font-weight: bold; line-height: 1.5; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        #status-bar { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        #status-indicator { background: #ff4757; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+        #score-board { color: #ffd700; font-weight: bold; font-size: 16px; text-shadow: 0 0 10px rgba(0,0,0,1); }
+        #feedback { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 120px; z-index: 25000; display: none; pointer-events: none; text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+        
+        #lang-toggle { position: fixed; bottom: 30px; left: 20px; z-index: 25000; pointer-events: auto; display: flex; gap: 5px; }
+        .lang-btn { background: rgba(0,0,0,0.7); color: white; border: 1px solid #ff4757; padding: 10px 15px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .lang-btn.active { background: #ff4757; }
+        #retry-btn { display: none; margin-top: 15px; padding: 10px 25px; background: #ff4757; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <div id="splash"><h1>ONI QUIZ AR</h1><button id="start-btn">試練を開始する</button></div>
+
+    <div id="ui-layer">
+        <div id="back-to-card" onclick="location.href='./index.html'"><img src="./face.jpg"></div>
+
+        <div id="question-container">
+            <div id="question-box">
+                <div id="question-text">鬼（ターゲット0）を映して<br>クイズを開始せよ！</div>
+                <button id="retry-btn">もう一度挑戦 (Retry)</button>
+            </div>
+            <div id="status-bar">
+                <div id="status-indicator">鬼を探索中</div>
+                <div id="score-board">SCORE: 0</div>
+            </div>
+        </div>
+        <div id="feedback"></div>
+        
+        <div id="lang-toggle">
+            <button id="btn-ja" class="lang-btn active" onclick="setLanguage('japanese')">JA</button>
+            <button id="btn-en" class="lang-btn" onclick="setLanguage('english')">EN</button>
+        </div>
+    </div>
+
+    <a-scene id="ar-scene" mindar-image="imageTargetSrc: ./quiz_targets.mind; maxTrack: 2; filterMinCF: 0.0001; filterBeta: 0.001; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;" renderer="colorManagement: true, preserveDrawingBuffer: true" vr-mode-ui="enabled: false">
+        <a-assets>
+            <a-asset-item id="oniModel" src="./oni.glb"></a-asset-item>
+        </a-assets>
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        
+        <a-entity id="target-oni" mindar-image-target="targetIndex: 0">
+            <a-gltf-model id="oni-visual" src="#oniModel" position="0 0 0" rotation="90 0 0" scale="0.9 0.9 0.9" animation-mixer="clip: rig|rig|Idle; loop: repeat"></a-gltf-model>
+        </a-entity>
+
+        <a-entity id="target-A" class="answer-target" mindar-image-target="targetIndex: 1"><a-plane visible="false" position="0 0 0.1" width="0.8" height="0.8" color="#ff4757" opacity="0.5" transparent="true"><a-text value="A" align="center" scale="4 4 4"></a-text></a-plane></a-entity>
+        <a-entity id="target-B" class="answer-target" mindar-image-target="targetIndex: 2"><a-plane visible="false" position="0 0 0.1" width="0.8" height="0.8" color="#2ed573" opacity="0.5" transparent="true"><a-text value="B" align="center" scale="4 4 4"></a-text></a-plane></a-entity>
+        <a-entity id="target-C" class="answer-target" mindar-image-target="targetIndex: 3"><a-plane visible="false" position="0 0 0.1" width="0.8" height="0.8" color="#1e90ff" opacity="0.5" transparent="true"><a-text value="C" align="center" scale="4 4 4"></a-text></a-plane></a-entity>
+    </a-scene>
+
+    <script>
+        const sceneEl = document.querySelector('a-scene');
+        const splash = document.getElementById('splash');
+        const uiLayer = document.getElementById('ui-layer');
+        const qBox = document.getElementById('question-text');
+        const retryBtn = document.getElementById('retry-btn');
+        const statusInd = document.getElementById('status-indicator');
+        const scoreBoard = document.getElementById('score-board');
+        const feedback = document.getElementById('feedback');
+        const oniEntity = document.getElementById('oni-visual');
+
+        let rawQuizData = [];
+        let quizData = [];
+        let currentIdx = 0;
+        let score = 0;
+        let isQuizStarted = false;
+        let isLock = false; 
+        let currentShowingCardId = null; 
+        let currentLang = navigator.language.startsWith('ja') ? 'japanese' : 'english';
+
+        const ANIMS = {
+            IDLE: 'rig|rig|Idle',
+            GREET: 'rig|rig|Greet',
+            ROAR: 'rig|rig|Roar'
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(lang === 'japanese' ? 'btn-ja' : 'btn-en').classList.add('active');
+            if (isQuizStarted) showNextQuestion();
+        }
+        window.setLanguage = setLanguage;
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function changeOniAnimation(clipName, loopMode = 'repeat') {
+            if (!oniEntity) return;
+            const mixerComponent = oniEntity.components['animation-mixer'];
+            if (mixerComponent && mixerComponent.mixer) {
+                mixerComponent.mixer.stopAllAction();
+            }
+            oniEntity.setAttribute('animation-mixer', {
+                clip: clipName,
+                loop: loopMode,
+                crossFadeDuration: 0.2,
+                clampWhenFinished: true
+            });
+            if (loopMode === 'once') {
+                const handleFinished = () => {
+                    oniEntity.removeEventListener('animation-finished', handleFinished);
+                    changeOniAnimation(ANIMS.IDLE, 'repeat');
+                };
+                oniEntity.addEventListener('animation-finished', handleFinished);
+            }
+        }
+
+        fetch('./quizzes.json')
+            .then(res => res.json())
+            .then(data => { 
+                rawQuizData = data.quizzes;
+                quizData = shuffleArray(rawQuizData).slice(0, 5); 
+            })
+            .catch(e => { qBox.innerText = "JSON読み込みエラー"; });
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            sceneEl.systems["mindar-image-system"].start();
+            uiLayer.style.display = 'block';
+            splash.style.opacity = '0';
+            setLanguage(currentLang);
+            setTimeout(() => { splash.style.display = 'none'; }, 800);
+        });
+
+        retryBtn.addEventListener('click', () => {
+            restartQuiz();
+        });
+
+        function restartQuiz() {
+            currentIdx = 0;
+            score = 0;
+            isLock = false;
+            scoreBoard.innerText = "SCORE: 0";
+            retryBtn.style.display = 'none';
+            quizData = shuffleArray(rawQuizData).slice(0, 5);
+            showNextQuestion();
+            changeOniAnimation(ANIMS.IDLE, 'repeat');
+        }
+
+        document.getElementById('target-oni').addEventListener("targetFound", () => {
+            if (!isQuizStarted) {
+                isQuizStarted = true;
+                showNextQuestion();
+                changeOniAnimation(ANIMS.IDLE, 'repeat');
+            }
+            statusInd.innerText = "鬼と対峙中";
+            statusInd.style.background = "#2ed573";
+        });
+
+        document.getElementById('target-oni').addEventListener("targetLost", () => {
+            if (isQuizStarted) {
+                statusInd.innerText = "鬼が隠れた（回答可能）";
+                statusInd.style.background = "#ffa502";
+            }
+        });
+
+        function showNextQuestion() {
+            if (currentIdx >= quizData.length) {
+                let finalMsg = currentLang === 'japanese' ? `試練終了！<br>最終スコア: ${score}` : `Trial End!<br>Final Score: ${score}`;
+                if (score === quizData.length * 10 && quizData.length > 0) {
+                    finalMsg += currentLang === 'japanese' ? "<br><strong style='color:#ffd700; font-size:1.2em;'>全問正解！あっぱれじゃ！</strong>" : "<br><strong style='color:#ffd700; font-size:1.2em;'>Perfect! Amazing!</strong>";
+                }
+                qBox.innerHTML = finalMsg;
+                statusInd.innerText = currentLang === 'japanese' ? "試練終了" : "Trial Ended";
+                retryBtn.style.display = 'inline-block';
+                return;
+            }
+            const q = quizData[currentIdx][currentLang];
+            const choices = q.choices;
+            qBox.innerHTML = `【问 ${currentIdx + 1}】<br>${q.questionText}<br><small style="color:#ffda79">A: ${choices[0]} | B: ${choices[1]} | C: ${choices[2]}</small>`;
+        }
+
+        function checkAnswer(userIndex) {
+            if (!isQuizStarted || isLock || currentIdx >= quizData.length) return;
+            isLock = true;
+            hideAllAnswerPlanes();
+
+            const correctIdx = quizData[currentIdx].correctAnswerIndex;
+            if (userIndex === correctIdx) {
+                score += 10;
+                scoreBoard.innerText = `SCORE: ${score}`;
+                showFeedback(currentLang === 'japanese' ? "⭕ 正解" : "⭕ Correct", "#2ed573");
+                changeOniAnimation(ANIMS.GREET, 'once');
+            } else {
+                showFeedback(currentLang === 'japanese' ? "❌ 不正解" : "❌ Wrong", "#ff4757");
+                changeOniAnimation(ANIMS.ROAR, 'once');
+            }
+
+            currentIdx++;
+            setTimeout(() => {
+                isLock = false;
+                showNextQuestion();
+            }, 3000);
+        }
+
+        function showFeedback(mark, color) {
+            feedback.innerText = mark.split(' ')[0];
+            feedback.style.color = color;
+            feedback.style.display = 'block';
+            document.getElementById('question-box').style.borderColor = color;
+            setTimeout(() => { 
+                feedback.style.display = 'none'; 
+                document.getElementById('question-box').style.borderColor = "#ff4757";
+            }, 2000);
+        }
+
+        function hideAllAnswerPlanes() {
+            document.querySelectorAll('.answer-target a-plane').forEach(p => p.setAttribute('visible', false));
+            currentShowingCardId = null;
+        }
+
+        ['target-A', 'target-B', 'target-C'].forEach((id, index) => {
+            const el = document.getElementById(id);
+            el.addEventListener("targetFound", () => {
+                if (isLock) return;
+                if (currentShowingCardId === null) {
+                    currentShowingCardId = id;
+                    el.querySelector('a-plane').setAttribute('visible', true);
+                    setTimeout(() => {
+                        if (currentShowingCardId === id && !isLock) {
+                            checkAnswer(index);
+                        }
+                    }, 500);
+                }
+            });
+            el.addEventListener("targetLost", () => {
+                if (currentShowingCardId === id) {
+                    el.querySelector('a-plane').setAttribute('visible', false);
+                    currentShowingCardId = null;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

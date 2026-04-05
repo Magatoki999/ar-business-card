@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>AR SNS - Fox Spirits Band</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; overflow: hidden; font-family: 'Hiragino Kaku Gothic ProN', sans-serif; background: #000; }
+        
+        /* スプラッシュ画面（ダーク＆スタイリッシュ） */
+        #splash { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1b 100%); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            color: #e0e0e0; z-index: 30000; transition: opacity 0.8s ease; 
+        }
+        #splash h1 { 
+            font-size: 2.2rem; letter-spacing: 0.2rem; margin-bottom: 40px; 
+            text-shadow: 0 0 20px rgba(0, 123, 255, 0.6); font-weight: 300;
+        }
+        #start-btn { 
+            padding: 20px 60px; font-size: 1.1rem; font-weight: bold; color: white; 
+            background: transparent; border: 2px solid #007bff; border-radius: 5px; 
+            cursor: pointer; position: relative; transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+        }
+        #start-btn:active { background: #007bff; transform: scale(0.95); }
+
+        #ui-layer { display: none; position: relative; z-index: 20000; }
+        #back-to-card { position: fixed; top: 20px; right: 20px; width: 66px; height: 66px; background: white; border: 4px solid #007bff; border-radius: 50%; z-index: 25000; overflow: hidden; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); pointer-events: auto; }
+        #back-to-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        #post-trigger { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            padding: 12px 25px; 
+            background: linear-gradient(45deg, #ff6b81, #ffa502); 
+            color: white; border: none; border-radius: 30px; 
+            font-weight: bold; font-size: 16px; z-index: 999; 
+            box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4); 
+            pointer-events: auto; border: 2.5px solid white;
+            display: flex; align-items: center; gap: 8px;
+        }
+        #post-trigger::before { content: "📣"; font-size: 18px; } 
+        #post-trigger::after { content: "💬"; font-size: 16px; } 
+        #post-trigger:active { transform: translateX(-50%) scale(0.92); }
+
+        #camera-btn { position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px; background: white; border: 5px solid #007bff; border-radius: 50%; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 28px; pointer-events: auto; }
+        #camera-btn::after { content: "📸"; }
+        #mv-toggle-btn { position: fixed; bottom: 105px; right: 20px; width: 65px; height: 65px; background: #ff4757; border: 5px solid white; border-radius: 50%; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #mv-toggle-btn::after { content: "📺"; }
+        #target-info-container { position: fixed; top: 20px; left: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+        #target-indicator { background: rgba(0,123,255,0.85); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        #ranking-status { background: rgba(255, 215, 0, 0.95); color: #333; padding: 8px 15px; border-radius: 15px; font-size: 12px; font-weight: bold; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        #input-form, #delete-confirm { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 25px; z-index: 25000; width: 90%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; pointer-events: auto; }
+        #input-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #f0f0f0; border-radius: 12px; font-size: 16px; outline: none; }
+        .form-btns button { flex: 1; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        #send-btn { background: #007bff; color: white; }
+        .heart-particle { position: fixed; pointer-events: none; z-index: 50000; font-size: 30px; user-select: none; animation: move-up 1s ease-out forwards; }
+        @keyframes move-up { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.5); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div id="splash"><h1>FOX SPIRITS AR</h1><button id="start-btn">ENTER SCENE</button></div>
+    <audio id="sound-like" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
+
+    <div id="ui-layer">
+        <div id="back-to-card" onclick="location.href='./index.html'"><img src="./face.jpg"></div>
+        <div id="target-info-container">
+            <div id="target-indicator">ターゲットを探してね...</div>
+            <div id="ranking-status"></div>
+        </div>
+        <button id="post-trigger">想いを送る</button> 
+        <div id="mv-toggle-btn"></div>
+        <div id="camera-btn"></div>
+        <div id="input-form">
+            <div id="user-label" style="margin-bottom: 15px; font-weight: bold; color: #007bff;"></div>
+            <div id="name-section"><input type="text" id="name-input" placeholder="お名前" maxlength="15"></div>
+            <input type="text" id="msg-input" placeholder="メッセージを入力" maxlength="60">
+            <div class="form-btns" style="display:flex; gap:10px; margin-top: 15px;">
+                <button id="send-btn">送信</button>
+                <button id="cancel-btn" style="background: #eee; color: #333;">中止</button>
+            </div>
+        </div>
+        <div id="delete-confirm">
+            <p style="font-weight: bold;">削除しますか？</p>
+            <div style="display:flex; gap:10px;">
+                <button id="real-delete-btn" style="flex:1; padding:14px; background:#ff4757; color:white; border:none; border-radius:12px; font-weight:bold;">削除</button>
+                <button id="cancel-delete-btn" style="flex:1; padding:14px; background:#eee; color:#333; border:none; border-radius:12px; font-weight:bold;">戻る</button>
+            </div>
+        </div>
+    </div>
+    
+    <a-scene id="ar-scene" mindar-image="imageTargetSrc: ./targets_sns.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;" renderer="colorManagement: true, preserveDrawingBuffer: true" vr-mode-ui="enabled: false">
+        <a-assets>
+            <a-asset-item id="myModel1" src="./model1.glb"></a-asset-item>
+            <a-asset-item id="myModel2" src="./model2.glb"></a-asset-item>
+            <a-asset-item id="myModel3" src="./model3.glb"></a-asset-item>
+            <a-asset-item id="myModel4" src="./model4.glb"></a-asset-item>
+            <video id="mv-video" src="./izayoi.mp4" loop="true" crossorigin="anonymous" playsinline webkit-playsinline muted></video>
+        </a-assets>
+        
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable"></a-camera>
+        
+        <a-entity id="target0" mindar-image-target="targetIndex: 0">
+            <a-gltf-model src="#myModel1" position="0 0 0.1" rotation="90 0 0" scale="0.6 0.6 0.6" animation-mixer></a-gltf-model>
+            <a-video class="mv-panel" src="#mv-video" width="2.4" height="1.34" position="0 1.2 2.0" rotation="-90 0 180" visible="false"></a-video>
+            <a-entity class="comment-container" position="0 0 0.1"></a-entity>
+        </a-entity>
+
+        <a-entity id="target1" mindar-image-target="targetIndex: 1">
+            <a-gltf-model src="#myModel2" position="0 0 0.1" rotation="90 0 0" scale="0.6 0.6 0.6" animation-mixer></a-gltf-model>
+            <a-video class="mv-panel" src="#mv-video" width="2.4" height="1.34" position="0 1.2 2.0" rotation="-90 0 180" visible="false"></a-video>
+            <a-entity class="comment-container" position="0 0 0.1"></a-entity>
+        </a-entity>
+
+        <a-entity id="target2" mindar-image-target="targetIndex: 2">
+            <a-gltf-model src="#myModel3" position="0 0 0.1" rotation="90 0 0" scale="0.6 0.6 0.6" animation-mixer></a-gltf-model>
+            <a-video class="mv-panel" src="#mv-video" width="2.4" height="1.34" position="0 1.2 2.0" rotation="-90 0 180" visible="false"></a-video>
+            <a-entity class="comment-container" position="0 0 0.1"></a-entity>
+        </a-entity>
+
+        <a-entity id="target3" mindar-image-target="targetIndex: 3">
+            <a-gltf-model src="#myModel4" position="0 0 0.1" rotation="90 0 0" scale="0.6 0.6 0.6" animation-mixer></a-gltf-model>
+            <a-video class="mv-panel" src="#mv-video" width="2.4" height="1.34" position="0 1.2 2.0" rotation="-90 0 180" visible="false"></a-video>
+            <a-entity class="comment-container" position="0 0 0.1"></a-entity>
+        </a-entity>
+    </a-scene>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, limit, serverTimestamp, doc, deleteDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
+        import { firebaseConfig } from "./config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const functions = getFunctions(app, 'us-central1');
+        const sceneEl = document.querySelector('a-scene');
+        const splash = document.getElementById('splash');
+        const uiLayer = document.getElementById('ui-layer');
+        const soundLike = document.getElementById('sound-like');
+        const mvVideo = document.getElementById('mv-video');
+
+        let currentScroll = 0;
+        let scrollVelocity = 0;
+        let touchStartPos = 0;
+        let isDragging = false;
+        let currentTargetIndex = -1;
+        let globalStats = {};
+        let isMvVisible = false;
+        const userId = localStorage.getItem('ar_user_id') || ('user_' + Math.random().toString(36).substr(2, 9));
+        localStorage.setItem('ar_user_id', userId);
+
+        function updateLoop() {
+            if (!isDragging && Math.abs(scrollVelocity) > 0.001) {
+                currentScroll += scrollVelocity;
+                scrollVelocity *= 0.92;
+                updateCommentPositions();
+            }
+            requestAnimationFrame(updateLoop);
+        }
+        updateLoop();
+
+        document.getElementById('mv-toggle-btn').onclick = () => {
+            isMvVisible = !isMvVisible;
+            document.querySelectorAll('.mv-panel').forEach(p => p.setAttribute('visible', isMvVisible));
+            
+            document.querySelectorAll('.comment-container').forEach(container => {
+                container.setAttribute('animation', {
+                    property: 'position',
+                    to: isMvVisible ? '1.4 0 0.1' : '0 0 0.1',
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+            });
+
+            if (isMvVisible) {
+                mvVideo.muted = false; // 音声を出す
+                mvVideo.play();
+                document.getElementById('mv-toggle-btn').style.background = "#2ed573";
+            } else {
+                mvVideo.pause();
+                document.getElementById('mv-toggle-btn').style.background = "#ff4757";
+            }
+            updateCommentPositions();
+        };
+
+        function startGlobalRankingMonitor() {
+            onSnapshot(collection(db, "comments"), (snapshot) => {
+                let stats = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const idx = data.targetIndex;
+                    const likes = data.likes || 0;
+                    if (idx !== undefined) stats[idx] = (stats[idx] || 0) + likes;
+                });
+                globalStats = stats;
+                refreshRankingUI();
+            });
+        }
+
+        function refreshRankingUI() {
+            const rankingStatus = document.getElementById('ranking-status');
+            if (currentTargetIndex === -1) { rankingStatus.style.display = 'none'; return; }
+            const sorted = Object.entries(globalStats).sort((a, b) => b[1] - a[1]);
+            const rankIndex = sorted.findIndex(([idx]) => idx == currentTargetIndex);
+            if (rankIndex !== -1) {
+                const rank = rankIndex + 1;
+                rankingStatus.innerHTML = `${rank === 1 ? '🏆' : '🥈'} 第${rank}位 (${globalStats[currentTargetIndex] || 0} ❤️)`;
+                rankingStatus.style.display = 'block';
+            }
+        }
+
+        // --- スプラッシュ画面の修正点：音声を確実に止める ---
+        document.getElementById('start-btn').addEventListener('click', () => {
+            sceneEl.systems["mindar-image-system"].start();
+            uiLayer.style.display = 'block';
+            splash.style.opacity = '0';
+
+            // 自動再生の権限を得るために一度 play するが、即座に一時停止し、ミュート状態を維持する
+            mvVideo.play().then(() => {
+                mvVideo.pause();
+                mvVideo.currentTime = 0;
+                mvVideo.muted = true; // MVボタンを押すまで音は出さない
+            }).catch(e => console.log("Video prep error:", e));
+
+            setTimeout(() => { splash.style.display = 'none'; startGlobalRankingMonitor(); }, 800);
+        });
+
+        [0, 1, 2, 3].forEach(index => {
+            const target = document.getElementById(`target${index}`);
+            target.addEventListener("targetFound", () => { 
+                currentTargetIndex = index; 
+                document.getElementById('target-indicator').innerText = `ターゲット発見`; 
+                refreshRankingUI(); 
+                loadComments(index); 
+            });
+            target.addEventListener("targetLost", () => { 
+                if (currentTargetIndex === index) { 
+                    currentTargetIndex = -1; 
+                    document.getElementById('target-indicator').innerText = `ターゲットを探してね...`; 
+                    document.getElementById('ranking-status').style.display = 'none'; 
+                    mvVideo.pause();
+                    mvVideo.currentTime = 0;
+                    mvVideo.muted = true; // ターゲットロスト時もミュートに戻す
+                    isMvVisible = false;
+                    document.querySelectorAll('.mv-panel').forEach(p => p.setAttribute('visible', 'false'));
+                    document.getElementById('mv-toggle-btn').style.background = "#ff4757";
+                } 
+            });
+        });
+
+        function updateCommentPositions() {
+            const container = document.querySelector(`#target${currentTargetIndex} .comment-container`);
+            if (!container) return;
+            const cards = container.querySelectorAll('a-image');
+            if (cards.length === 0) return;
+            let currentZ = 0.8; 
+            const GAP = 0.05;
+            cards.forEach((card) => {
+                const h = parseFloat(card.getAttribute('height'));
+                const posZ = currentZ + (h / 2) - currentScroll;
+                card.setAttribute('position', `0 0.8 ${posZ}`);
+                currentZ += h + GAP;
+                let opacity = isMvVisible ? 0.6 : 1.0;
+                if (posZ < 0.6) opacity *= Math.max(0, (posZ - 0.4) / 0.2);
+                if (posZ > 2.5) opacity *= Math.max(0, 1 - (posZ - 2.5) / 0.4);
+                card.setAttribute('material', 'opacity', opacity);
+                if (opacity < 0.2) card.classList.remove('clickable'); else card.classList.add('clickable');
+            });
+            const totalContentHeight = currentZ - 0.8;
+            const max = Math.max(0, totalContentHeight - 0.4);
+            if (currentScroll < 0) currentScroll = 0;
+            if (currentScroll > max) currentScroll = max;
+        }
+
+        let lastActionTime = 0;
+        let pendingDeleteId = null;
+        const handleAction = async (clientX, clientY) => {
+            const now = Date.now();
+            if (now - lastActionTime < 300) return;
+            const camera = sceneEl.camera;
+            const mouse = new THREE.Vector2((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+            const clickables = Array.from(document.querySelectorAll('.clickable')).map(el => el.object3D);
+            const intersects = raycaster.intersectObjects(clickables, true);
+            if (intersects.length > 0) {
+                lastActionTime = now;
+                let targetEl = intersects[0].object.el;
+                const docId = targetEl.dataset.docid;
+                const ownerId = targetEl.dataset.ownerid;
+
+                targetEl.setAttribute('animation__pulse', {
+                    property: 'scale',
+                    from: '1 1 1',
+                    to: '1.1 1.1 1.1',
+                    dur: 100,
+                    dir: 'alternate',
+                    loop: 1
+                });
+
+                if (ownerId === userId) {
+                    pendingDeleteId = docId;
+                    document.getElementById('delete-confirm').style.display = 'block';
+                } else {
+                    const likedComments = JSON.parse(localStorage.getItem('liked_comments') || "[]");
+                    if (likedComments.includes(docId)) return;
+                    createHeartBurst(clientX, clientY);
+                    likedComments.push(docId);
+                    localStorage.setItem('liked_comments', JSON.stringify(likedComments));
+                    await updateDoc(doc(db, "comments", docId), { likes: increment(1) });
+                }
+            }
+        };
+
+        function createHeartBurst(x, y) {
+            soundLike.currentTime = 0; soundLike.play().catch(e=>{});
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div'); heart.className = 'heart-particle'; 
+                heart.innerHTML = ['❤️', '✨', '💖', '🦊'][Math.floor(Math.random() * 4)];
+                heart.style.left = x + 'px'; heart.style.top = y + 'px';
+                heart.style.setProperty('--dx', (Math.random() - 0.5) * 400 + 'px'); heart.style.setProperty('--dy', (Math.random() - 1) * 400 + 'px');
+                document.body.appendChild(heart); setTimeout(() => heart.remove(), 1000);
+            }
+        }
+
+        window.addEventListener('touchstart', (e) => { 
+            if (e.target.closest('#ui-layer')) return; 
+            touchStartPos = e.touches[0].clientY; 
+            scrollVelocity = 0;
+            isDragging = false; 
+        });
+        window.addEventListener('touchmove', (e) => { 
+            if (e.target.closest('#ui-layer')) return; 
+            const deltaY = touchStartPos - e.touches[0].clientY; 
+            if (Math.abs(deltaY) > 2) { 
+                isDragging = true; 
+                const moveStep = deltaY * 0.005;
+                currentScroll += moveStep;
+                scrollVelocity = moveStep;
+                updateCommentPositions(); 
+                touchStartPos = e.touches[0].clientY; 
+            } 
+        });
+        window.addEventListener('touchend', (e) => { 
+            if (!isDragging && !e.target.closest('#ui-layer')) {
+                handleAction(e.changedTouches[0].clientX, e.changedTouches[0].clientY); 
+            } else {
+                scrollVelocity *= 1.2; 
+            }
+        });
+        window.addEventListener('mousedown', (e) => { if (e.target.closest('#ui-layer') || e.button !== 0) return; handleAction(e.clientX, e.clientY); });
+
+        function loadComments(targetIdx) {
+            const q = query(collection(db, "comments"), where("targetIndex", "==", targetIdx), orderBy("createdAt", "desc"), limit(20));
+            onSnapshot(q, (snapshot) => {
+                const container = document.querySelector(`#target${targetIdx} .comment-container`);
+                while (container.firstChild) container.removeChild(container.firstChild);
+                snapshot.forEach((snapshotDoc) => {
+                    const data = snapshotDoc.data();
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const fullText = `${data.name || '匿名'}: ${data.text}`;
+                    
+                    const scale = 2;
+                    const fontSize = 65 * scale;   
+                    ctx.font = `bold ${fontSize}px sans-serif`;
+                    
+                    let lines = [];
+                    let currentLine = "";
+                    const maxWidth = 1400 * scale;
+                    for (let char of fullText) {
+                        if (ctx.measureText(currentLine + char).width > maxWidth) { lines.push(currentLine); currentLine = char; } 
+                        else { currentLine += char; }
+                    }
+                    lines.push(currentLine);
+                    lines = lines.slice(0, 4);
+                    
+                    canvas.width = 1600 * scale;
+                    canvas.height = (120 + (lines.length * (fontSize + 15 * scale))); 
+                    
+                    ctx.fillStyle = (data.uid === "ai_bot") ? "rgba(0, 110, 255, 0.95)" : (data.uid === userId ? "#141414" : "rgba(50, 50, 50, 0.85)");
+                    ctx.beginPath(); ctx.roundRect(0, 0, canvas.width, canvas.height, 60 * scale); ctx.fill();
+                    
+                    ctx.fillStyle = (data.uid === "ai_bot") ? "#fff9e6" : (data.uid === userId ? "#00d2ff" : "#ffffff");
+                    ctx.font = `bold ${fontSize}px sans-serif`; ctx.textBaseline = "top";
+                    lines.forEach((line, i) => { ctx.fillText(line, 80 * scale, 60 * scale + (i * (fontSize + 15 * scale))); });
+                    
+                    ctx.fillStyle = "#ff6b81"; 
+                    ctx.font = `bold ${50 * scale}px sans-serif`;
+                    ctx.fillText(`❤️ ${data.likes || 0}`, canvas.width - 250 * scale, canvas.height - 85 * scale);
+                    
+                    const el = document.createElement('a-image');
+                    el.setAttribute('src', canvas.toDataURL());
+                    const f = 1.2; 
+                    el.setAttribute('width', (canvas.width / (1000 * scale)) * f); 
+                    el.setAttribute('height', (canvas.height / (1000 * scale)) * f);
+                    el.setAttribute('rotation', '90 0 0'); el.classList.add('clickable');
+                    el.dataset.docid = snapshotDoc.id; el.dataset.ownerid = data.uid;
+                    container.appendChild(el);
+                });
+                updateCommentPositions();
+            });
+        }
+
+        document.getElementById('send-btn').onclick = async () => {
+            const val = document.getElementById('msg-input').value.trim(); if (!val) return;
+            const name = localStorage.getItem('ar_user_name') || document.getElementById('name-input').value.trim() || "匿名";
+            localStorage.setItem('ar_user_name', name);
+            const activeTarget = currentTargetIndex;
+            document.getElementById('msg-input').value = ''; document.getElementById('input-form').style.display = 'none';
+            await addDoc(collection(db, "comments"), { uid: userId, name: name, text: val, targetIndex: activeTarget, createdAt: serverTimestamp(), likes: 0 });
+            if (val.startsWith("!") || val.startsWith("！")) {
+                try {
+                    const askAI = httpsCallable(functions, 'askAI');
+                    const result = await askAI({ text: val, targetIndex: activeTarget });
+                    if (result.data?.reply) { await addDoc(collection(db, "comments"), { uid: "ai_bot", name: result.data.senderName || "Magatoki AI", text: result.data.reply, targetIndex: activeTarget, createdAt: serverTimestamp(), likes: 0 }); }
+                } catch (e) { console.error(e); }
+            }
+        };
+
+        document.getElementById('post-trigger').onclick = () => { if (currentTargetIndex !== -1) { const savedName = localStorage.getItem('ar_user_name'); document.getElementById('name-section').style.display = savedName ? 'none' : 'block'; document.getElementById('user-label').innerText = savedName ? `${savedName} で投稿` : "お名前を教えてね"; document.getElementById('input-form').style.display = 'block'; }};
+        document.getElementById('cancel-btn').onclick = () => document.getElementById('input-form').style.display = 'none';
+        document.getElementById('real-delete-btn').onclick = async () => { if (pendingDeleteId) await deleteDoc(doc(db, "comments", pendingDeleteId)); document.getElementById('delete-confirm').style.display = 'none'; };
+        document.getElementById('cancel-delete-btn').onclick = () => document.getElementById('delete-confirm').style.display = 'none';
+        
+        document.getElementById('camera-btn').onclick = () => {
+            const allVideos = document.querySelectorAll('video');
+            let realVideo = null;
+            allVideos.forEach(v => {
+                if (v.id !== 'mv-video') { realVideo = v; }
+            });
+            if (!realVideo) { alert("カメラ映像が取得できませんでした。"); return; }
+            const sceneCanvas = sceneEl.canvas;
+            const canvas = document.createElement('canvas');
+            const displayWidth = sceneCanvas.clientWidth;
+            const displayHeight = sceneCanvas.clientHeight;
+            canvas.width = displayWidth;
+            canvas.height = displayHeight;
+            const ctx = canvas.getContext('2d');
+            const vWidth = realVideo.videoWidth;
+            const vHeight = realVideo.videoHeight;
+            const vAspect = vWidth / vHeight;
+            const cAspect = displayWidth / displayHeight;
+            let sx, sy, sw, sh;
+            if (vAspect > cAspect) {
+                sw = vHeight * cAspect; sh = vHeight; sx = (vWidth - sw) / 2; sy = 0;
+            } else {
+                sw = vWidth; sh = vWidth / cAspect; sx = 0; sy = (vHeight - sh) / 2;
+            }
+            ctx.save();
+            ctx.drawImage(realVideo, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
+            ctx.drawImage(sceneCanvas, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/png');
+            const previewDiv = document.createElement('div');
+            previewDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:40000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;";
+            previewDiv.innerHTML = `
+                <div style="text-align:center; width:100%;">
+                    <p style="margin-bottom:15px; font-weight:bold;">📸 保存は画像を長押し！</p>
+                    <img src="${dataUrl}" style="max-width:90%; max-height:75vh; border:2px solid white; border-radius:10px;">
+                    <br>
+                    <button id="close-preview" style="margin-top:20px; padding:15px 45px; background:#007bff; color:white; border:none; border-radius:30px; font-size:16px; font-weight:bold;">閉じる</button>
+                </div>
+            `;
+            document.body.appendChild(previewDiv);
+            document.getElementById('close-preview').onclick = () => previewDiv.remove();
+        };
+    </script>
+</body>
+</html>

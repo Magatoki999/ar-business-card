@@ -1,0 +1,335 @@
+{
+    "quizzes": [
+      {
+        "japanese": {
+          "questionText": "金閣寺を建立した室町幕府の将軍は誰？",
+          "choices": ["足利義満", "足利義政", "徳川家康"]
+        },
+        "english": {
+          "questionText": "Which shogun of the Muromachi shogunate built the Golden Pavilion (Kinkaku-ji)?",
+          "choices": ["Ashikaga Yoshimitsu", "Ashikaga Yoshimasa", "Tokugawa Ieyasu"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "清水寺の舞台は何で有名？",
+          "choices": ["滝", "断崖絶壁の舞台", "巨大な大仏"]
+        },
+        "english": {
+          "questionText": "What is the Kiyomizu-dera stage famous for?",
+          "choices": ["Waterfall", "Stage over a cliff", "Huge Buddha statue"]
+        },
+        "correctAnswerIndex": 1
+      },
+      {
+        "japanese": {
+          "questionText": "京都の有名な祭りで、7月に行われるものはどれ？",
+          "choices": ["祇園祭", "葵祭", "時代祭"]
+        },
+        "english": {
+          "questionText": "Which famous festival in Kyoto is held in July?",
+          "choices": ["Gion Matsuri", "Aoi Matsuri", "Jidai Matsuri"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "応仁の乱で西軍の陣地が置かれたことに由来する京都の織物は？",
+          "choices": ["西陣織", "友禅染", "丹後ちりめん"]
+        },
+        "english": {
+          "questionText": "Which Kyoto textile is named after the western army's camp during the Ōnin War?",
+          "choices": ["Nishijin-ori", "Yuzen dyeing", "Tango Chirimen"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統的な茶道を大成した人物は？",
+          "choices": ["千利休", "本阿弥光悦", "松尾芭蕉"]
+        },
+        "english": {
+          "questionText": "Who perfected the traditional tea ceremony in Kyoto?",
+          "choices": ["Sen no Rikyū", "Hon'ami Kōetsu", "Matsuo Bashō"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伏見稲荷大社で有名なのは？",
+          "choices": ["五重塔", "千本鳥居", "金色の大仏"]
+        },
+        "english": {
+          "questionText": "What is Fushimi Inari Taisha in Kyoto famous for?",
+          "choices": ["Five-story pagoda", "Thousands of torii gates", "Golden Buddha"]
+        },
+        "correctAnswerIndex": 1
+      },
+      {
+        "japanese": {
+          "questionText": "京都三大祭の一つで、平安時代の装束を身に着けた行列が行われる祭は？",
+          "choices": ["時代祭", "葵祭", "祇園祭"]
+        },
+        "english": {
+          "questionText": "Which of Kyoto’s three great festivals features a parade with Heian-era costumes?",
+          "choices": ["Jidai Matsuri", "Aoi Matsuri", "Gion Matsuri"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "世界文化遺産に登録されている銀閣寺を建てた将軍は？",
+          "choices": ["足利義政", "足利義満", "豊臣秀吉"]
+        },
+        "english": {
+          "questionText": "Which shogun built Ginkaku-ji (Silver Pavilion), a UNESCO World Heritage Site?",
+          "choices": ["Ashikaga Yoshimasa", "Ashikaga Yoshimitsu", "Toyotomi Hideyoshi"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "八坂神社はどの祭りの中心となる神社？",
+          "choices": ["祇園祭", "時代祭", "葵祭"]
+        },
+        "english": {
+          "questionText": "Which festival is centered around Yasaka Shrine?",
+          "choices": ["Gion Matsuri", "Jidai Matsuri", "Aoi Matsuri"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統的な菓子「八つ橋」の主な材料は？",
+          "choices": ["米粉", "小麦粉", "そば粉"]
+        },
+        "english": {
+          "questionText": "What is the main ingredient of Kyoto’s traditional sweet 'Yatsuhashi'?",
+          "choices": ["Rice flour", "Wheat flour", "Buckwheat flour"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都御所はどの時代まで天皇の住まいだった？",
+          "choices": ["明治時代まで", "江戸時代まで", "平安時代まで"]
+        },
+        "english": {
+          "questionText": "Until which period was the Kyoto Imperial Palace the emperor's residence?",
+          "choices": ["Until Meiji period", "Until Edo period", "Until Heian period"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の禅寺、龍安寺は何で特に有名？",
+          "choices": ["枯山水の石庭", "高さのある五重塔", "大きな仏像"]
+        },
+        "english": {
+          "questionText": "What is Ryōan-ji, a Zen temple in Kyoto, especially famous for?",
+          "choices": ["Rock garden (karesansui)", "Tall five-story pagoda", "Large Buddha statue"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統芸能で、芸妓や舞妓が舞を披露する場所として有名なのは？",
+          "choices": ["祇園", "嵐山", "清水坂"]
+        },
+        "english": {
+          "questionText": "Which district in Kyoto is famous for geisha and maiko performances?",
+          "choices": ["Gion", "Arashiyama", "Kiyomizu-zaka"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "平等院鳳凰堂があるのは京都のどの地域？",
+          "choices": ["宇治", "嵐山", "鞍馬"]
+        },
+        "english": {
+          "questionText": "In which area of Kyoto is Byōdō-in Phoenix Hall located?",
+          "choices": ["Uji", "Arashiyama", "Kurama"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統料理「湯豆腐」が特に有名な寺院は？",
+          "choices": ["南禅寺", "東福寺", "妙心寺"]
+        },
+        "english": {
+          "questionText": "Which temple in Kyoto is especially famous for Yudofu (hot tofu)?",
+          "choices": ["Nanzen-ji", "Tōfuku-ji", "Myōshin-ji"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都で最古の禅寺とされるのはどこ？",
+          "choices": ["建仁寺", "南禅寺", "東福寺"]
+        },
+        "english": {
+          "questionText": "Which is considered the oldest Zen temple in Kyoto?",
+          "choices": ["Kennin-ji", "Nanzen-ji", "Tōfuku-ji"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "千本鳥居で知られる伏見稲荷大社に祀られている神は誰？",
+          "choices": ["稲荷神（宇迦之御魂神）", "天照大神", "八幡神"]
+        },
+        "english": {
+          "questionText": "Which deity is enshrined at Fushimi Inari Taisha, famous for its thousands of torii gates?",
+          "choices": ["Inari Ōkami (Ukanomitama-no-kami)", "Amaterasu Ōmikami", "Hachiman"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統的な染色技法で、友禅染を完成させた人物は？",
+          "choices": ["宮崎友禅", "尾形光琳", "本阿弥光悦"]
+        },
+        "english": {
+          "questionText": "Who perfected the Kyoto traditional dyeing technique known as Yuzen dyeing?",
+          "choices": ["Miyazaki Yūzen", "Ogata Kōrin", "Hon'ami Kōetsu"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の五山送り火で最も有名な山は？",
+          "choices": ["大文字山", "嵐山", "比叡山"]
+        },
+        "english": {
+          "questionText": "Which mountain is the most famous in Kyoto’s Gozan no Okuribi (Daimonji fire festival)?",
+          "choices": ["Daimonji-yama", "Arashiyama", "Mount Hiei"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "平安京が造営された時の方位を占った専門家は何と呼ばれていた？",
+          "choices": ["陰陽師", "陰陽寮", "風水師"]
+        },
+        "english": {
+          "questionText": "What were the specialists who divined the directions for the construction of Heian-kyō called?",
+          "choices": ["Onmyōji", "Onmyōryō officials", "Feng shui masters"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "江戸時代に京都で発展した豪商の町屋が多く残る地域は？",
+          "choices": ["祇園", "西陣", "京町家地区（四条界隈）"]
+        },
+        "english": {
+          "questionText": "Which Kyoto district preserves many machiya townhouses from wealthy merchants of the Edo period?",
+          "choices": ["Gion", "Nishijin", "Kyomachiya area (around Shijō)"]
+        },
+        "correctAnswerIndex": 2
+      },
+      {
+        "japanese": {
+          "questionText": "京都の精進料理で有名な食材で、干した大根を煮込んだものを何と呼ぶ？",
+          "choices": ["切干大根", "高野豆腐", "ごまどうふ"]
+        },
+        "english": {
+          "questionText": "In Kyoto’s shōjin ryōri (Buddhist cuisine), what is the dish made by simmering dried daikon radish called?",
+          "choices": ["Kiriboshi daikon", "Koya tofu", "Sesame tofu (Gomadōfu)"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の庭園文化に大きな影響を与えた、室町時代の将軍は誰？",
+          "choices": ["足利義満", "足利義政", "足利尊氏"]
+        },
+        "english": {
+          "questionText": "Which Muromachi shogun had a major influence on Kyoto’s garden culture?",
+          "choices": ["Ashikaga Yoshimitsu", "Ashikaga Yoshimasa", "Ashikaga Takauji"]
+        },
+        "correctAnswerIndex": 1
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統工芸で、漆に金粉を蒔いて模様を描く技法は何？",
+          "choices": ["蒔絵", "螺鈿", "截金"]
+        },
+        "english": {
+          "questionText": "What is the Kyoto traditional craft technique of sprinkling gold powder onto lacquer to create designs?",
+          "choices": ["Maki-e", "Raden (mother-of-pearl inlay)", "Kirikane (cut gold leaf)"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "平安時代に建てられ、現存する日本最古の寝殿造の遺構を持つ京都の寺院は？",
+          "choices": ["宇治平等院", "京都御所", "醍醐寺"]
+        },
+        "english": {
+          "questionText": "Which Kyoto temple, built in the Heian period, preserves the oldest surviving example of shinden-zukuri architecture?",
+          "choices": ["Byōdō-in in Uji", "Kyoto Imperial Palace", "Daigo-ji"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "祇園の花街で舞妓が初めて客の前に出る儀式を何と呼ぶ？",
+          "choices": ["みせ出し", "襟替え", "初舞台"]
+        },
+        "english": {
+          "questionText": "What is the ceremony called when a maiko in Kyoto’s Gion district first appears before customers?",
+          "choices": ["Misedashi", "Erikae", "Debut performance"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統行事で、夏に行われる川に足を浸して無病息災を祈る習慣は？",
+          "choices": ["御手洗祭", "鞍馬火祭", "大文字送り火"]
+        },
+        "english": {
+          "questionText": "Which traditional Kyoto summer ritual involves immersing feet in the river to pray for health?",
+          "choices": ["Mitarashi Festival", "Kurama Fire Festival", "Daimonji Bonfire"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都で「鯖街道」と呼ばれる街道はどの地域に通じていた？",
+          "choices": ["若狭", "大津", "奈良"]
+        },
+        "english": {
+          "questionText": "The 'Saba Kaidō' (Mackerel Road) of Kyoto led to which region?",
+          "choices": ["Wakasa", "Ōtsu", "Nara"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統的な町家で、通りから奥へと細長く続く構造を何と呼ぶ？",
+          "choices": ["鰻の寝床", "坪庭", "土間"]
+        },
+        "english": {
+          "questionText": "What is the name for the long, narrow structure of Kyoto machiya townhouses that extend deep from the street?",
+          "choices": ["Unagi no nedoko (eel’s bed)", "Tsubo-niwa (small courtyard garden)", "Doma (earthen floor)"]
+        },
+        "correctAnswerIndex": 0
+      },
+      {
+        "japanese": {
+          "questionText": "京都の伝統芸能「狂言」と「能」がともに発展した場所として有名な寺は？",
+          "choices": ["大徳寺", "金剛能楽堂", "壬生寺"]
+        },
+        "english": {
+          "questionText": "Which temple in Kyoto is famous as a place where both Kyōgen and Noh developed?",
+          "choices": ["Daitoku-ji", "Kongō Noh Theatre", "Mibu-dera"]
+        },
+        "correctAnswerIndex": 2
+      }
+    ]
+  }
+  
